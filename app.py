@@ -4,10 +4,12 @@ import numpy as np
 
 captured_image = None
 
+
 # Function to capture the frame inside the rectangle
 def capture_frame(frame, rect):
     x, y, w, h = rect
-    return frame[y:y+h, x:x+w]
+    return frame[y : y + h, x : x + w]
+
 
 # Function to compare the captured image with the live frame inside the rectangle
 def compare_images(image1, image2):
@@ -18,9 +20,10 @@ def compare_images(image1, image2):
     # Compute SSIM
     score, diff = ssim(image1_gray, image2_gray, full=True)
     diff = (diff * 255).astype("uint8")
-    
+
     print(f"SSIM Score: {score:.4f}")
     return score, diff
+
 
 # Function to handle video capture and drawing
 def video_capture():
@@ -47,34 +50,50 @@ def video_capture():
         print(frame.shape)
 
         # Draw a rectangle in the middle of the frame
-        cv2.rectangle(frame, (rect_x, rect_y), (rect_x + rect_w, rect_y + rect_h), (0, 255, 0), 2)
+        cv2.rectangle(
+            frame, (rect_x, rect_y), (rect_x + rect_w, rect_y + rect_h), (0, 255, 0), 2
+        )
 
         # Show the live video feed
-        cv2.imshow('Live Video Feed', frame)
+        cv2.imshow("Live Video Feed", frame)
 
         # Capture frame with 'c' and compare with 'v'
         key = cv2.waitKey(1) & 0xFF
 
-        
-        if key == ord('c'):  # Capture
+        if key == ord("c"):  # Capture
             captured_image = capture_frame(frame, rect)
-            cv2.imshow('Captured Image', captured_image)
+            cv2.imshow("Captured Image", captured_image)
             print("Image Captured!")
 
-        elif key == ord('v'):  # Compare
+        elif key == ord("v"):  # Compare
             if captured_image is not None:
                 live_frame = capture_frame(frame, rect)
                 score, diff_image = compare_images(captured_image, live_frame)
-                cv2.imshow('Live Image', live_frame)
-                cv2.imshow('Difference Image', diff_image)
+                cv2.imshow("Live Image", live_frame)
+                cv2.imshow("Difference Image", diff_image)
+
+                # Show the comparison probability in a new window
+                comparison_text = f"SSIM Score: {score:.4f}"
+                comparison_image = np.zeros((100, 400, 3), dtype="uint8")
+                cv2.putText(
+                    comparison_image,
+                    comparison_text,
+                    (10, 50),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1,
+                    (255, 255, 255),
+                    2,
+                )
+                cv2.imshow("Comparison Probability", comparison_image)
             else:
                 print("No image captured for comparison.")
 
-        elif key == ord('q'):  # Quit
+        elif key == ord("q"):  # Quit
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
 
 # Run the video capture
 video_capture()
