@@ -1,15 +1,15 @@
 import cv2
 from skimage.metrics import structural_similarity as ssim
 import numpy as np
+import FreeSimpleGUIWeb as sg
+
 
 captured_image = None
-
 
 # Function to capture the frame inside the rectangle
 def capture_frame(frame, rect):
     x, y, w, h = rect
     return frame[y : y + h, x : x + w]
-
 
 # Function to compare the captured image with the live frame inside the rectangle
 def compare_images(image1, image2):
@@ -24,10 +24,10 @@ def compare_images(image1, image2):
     print(f"SSIM Score: {score:.4f}")
     return score, diff
 
-
 # Function to handle video capture and drawing
 def video_capture():
     global captured_image
+    global window
 
     # cap = cv2.VideoCapture(2)
     cap = cv2.VideoCapture(0)
@@ -43,57 +43,54 @@ def video_capture():
     rect_y = (frame_height - rect_h) // 2
     rect = (rect_x, rect_y, rect_w, rect_h)
 
+    layout = [
+        [sg.Image(filename="", key="-IMAGE-")],
+        [sg.Button("Capture", key="-CAPTURE-"), sg.Button("Compare", key="-COMPARE-"), sg.Button("Quit", key="-QUIT-")],
+        [sg.Text("", key="-SSIM-")]
+    ]
+
+
     while True:
+        event, values = window.read(timeout=20)
         ret, frame = cap.read()
         if not ret:
             break
-        print(frame.shape)
 
         # Draw a rectangle in the middle of the frame
-        cv2.rectangle(
-            frame, (rect_x, rect_y), (rect_x + rect_w, rect_y + rect_h), (0, 255, 0), 2
-        )
+        cv2.rectangle(frame, (rect_x, rect_y), (rect_x + rect_w, rect_y + rect_h), (0, 255, 0), 2)
 
-        # Show the live video feed
-        cv2.imshow("Live Video Feed", frame)
+        # Convert the frame to a format that can be displayed in PySimpleGUI
+        imgbytes = cv2.imencode(".png", frame)[1].tobytes()
+        window["-IMAGE-"].update(data=imgbytes)
 
-        # Capture frame with 'c' and compare with 'v'
-        key = cv2.waitKey(1) & 0xFF
+        if event == sg.WIN_CLOSED or event == "-QUIT-":
+            break
 
-        if key == ord("c"):  # Capture
+        if event == "-CAPTURE-":
             captured_image = capture_frame(frame, rect)
-            cv2.imshow("Captured Image", captured_image)
             print("Image Captured!")
 
-        elif key == ord("v"):  # Compare
+        if event == "-COMPARE-":
             if captured_image is not None:
                 live_frame = capture_frame(frame, rect)
                 score, diff_image = compare_images(captured_image, live_frame)
-                cv2.imshow("Live Image", live_frame)
-                cv2.imshow("Difference Image", diff_image)
-
-                # Show the comparison probability in a new window
-                comparison_text = f"SSIM Score: {score:.4f}"
-                comparison_image = np.zeros((100, 400, 3), dtype="uint8")
-                cv2.putText(
-                    comparison_image,
-                    comparison_text,
-                    (10, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1,
-                    (255, 255, 255),
-                    2,
-                )
-                cv2.imshow("Comparison Probability", comparison_image)
+                diff_imgbytes = cv2.imencode(".png", diff_image)[1].tobytes()
+                window["-IMAGE-"].update(data=diff_imgbytes)
+                window["-SSIM-"].update(f"SSIM Score: {score:.4f}")
             else:
                 print("No image captured for comparison.")
 
-        elif key == ord("q"):  # Quit
-            break
-
     cap.release()
-    cv2.destroyAllWindows()
+    window.close()
 
+# Define the layout and window
+layout = [
+    [sg.Image(filename="", key="-IMAGE-")],
+    [sg.Button("Capture", key="-CAPTURE-"), sg.Button("Compare", key="-COMPARE-"), sg.Button("Quit", key="-QUIT-")],
+    [sg.Text("", key="-SSIM-")]
+]
+
+window = sg.Window("Video Capture", layout, location=(800, 400), web_port=8080, web_start_browser=True)
 
 # Run the video capture
 video_capture()
