@@ -3,8 +3,9 @@ from skimage.metrics import structural_similarity as ssim
 import numpy as np
 import FreeSimpleGUIWeb as sg
 
-
 captured_image = None
+window = None
+cap = None
 
 # Function to capture the frame inside the rectangle
 def capture_frame(frame, rect):
@@ -28,6 +29,7 @@ def compare_images(image1, image2):
 def video_capture():
     global captured_image
     global window
+    global cap
 
     # cap = cv2.VideoCapture(2)
     cap = cv2.VideoCapture(0)
@@ -44,11 +46,12 @@ def video_capture():
     rect = (rect_x, rect_y, rect_w, rect_h)
 
     layout = [
-        [sg.Image(filename="", key="-IMAGE-")],
+        [sg.Image(filename="", key="-IMAGE-"), sg.Image(filename="", key="-CAPTURED-"), sg.Image(filename="", key="-DIFF-"), sg.Image(filename="", key="-CURRENTFRAME-")],
         [sg.Button("Capture", key="-CAPTURE-"), sg.Button("Compare", key="-COMPARE-"), sg.Button("Quit", key="-QUIT-")],
         [sg.Text("", key="-SSIM-")]
     ]
 
+    window = sg.Window("Video Capture", layout, location=(800, 400), web_port=8080, web_start_browser=True)
 
     while True:
         event, values = window.read(timeout=20)
@@ -64,33 +67,49 @@ def video_capture():
         window["-IMAGE-"].update(data=imgbytes)
 
         if event == sg.WIN_CLOSED or event == "-QUIT-":
+            print("Closing the window...")
             break
 
         if event == "-CAPTURE-":
+            print("Capturing image...")
             captured_image = capture_frame(frame, rect)
+            captured_imgbytes = cv2.imencode(".png", captured_image)[1].tobytes()
+            window["-CAPTURED-"].update(data=captured_imgbytes)
             print("Image Captured!")
 
         if event == "-COMPARE-":
+            print("Comparing images...")
             if captured_image is not None:
                 live_frame = capture_frame(frame, rect)
                 score, diff_image = compare_images(captured_image, live_frame)
                 diff_imgbytes = cv2.imencode(".png", diff_image)[1].tobytes()
-                window["-IMAGE-"].update(data=diff_imgbytes)
+                live_imgbytes = cv2.imencode(".png", live_frame)[1].tobytes()
+                window["-IMAGE-"].update(data=live_imgbytes)
+                window["-CURRENTFRAME-"].update(data=live_imgbytes)
+                window["-DIFF-"].update(data=diff_imgbytes)
                 window["-SSIM-"].update(f"SSIM Score: {score:.4f}")
             else:
                 print("No image captured for comparison.")
 
+    print("Closing the window...")
     cap.release()
+    print("Releasing the camera...")
+    cv2.destroyAllWindows()
+    print("Destroy all cv2 window")
     window.close()
-
-# Define the layout and window
-layout = [
-    [sg.Image(filename="", key="-IMAGE-")],
-    [sg.Button("Capture", key="-CAPTURE-"), sg.Button("Compare", key="-COMPARE-"), sg.Button("Quit", key="-QUIT-")],
-    [sg.Text("", key="-SSIM-")]
-]
-
-window = sg.Window("Video Capture", layout, location=(800, 400), web_port=8080, web_start_browser=True)
+    print("Window closed")
 
 # Run the video capture
-video_capture()
+try:
+    video_capture()
+except Exception as err:
+    print(f"Error: {err}")
+
+    print("Closing the window...")
+    cap.release()
+    print("Releasing the camera...")
+    cv2.destroyAllWindows()
+    print("Destroy all cv2 window")
+    window.close()
+    print("Window closed")
+
