@@ -96,8 +96,8 @@ def video_capture():
                         sg.Button("Single Compare", key="-COMPARE-"),
                         sg.Button("Enable/Disable Auto Compare", key="-AUTO-COMPARE-"),
                     ],
-                    [sg.Text("Similarity: 0.00%", key="-SSIM-")],
-                    [sg.Text("Similarity Decision: ", key="-DECISION-")],
+                    [sg.Text("Similarity: 0.00%", key="-SSIM-",font=("Helvetica", 16))],
+                    [sg.Text("Similarity Decision: ", key="-DECISION-",font=("Helvetica", 16),background_color="red")],
                     [
                         sg.Text("Top"),
                         sg.Slider(
@@ -218,8 +218,10 @@ def video_capture():
 
             # Determine similarity decision
             decision = "Similar" if score >= similarity_threshold else "Dissimilar"
+            color = "green" if score >= similarity_threshold else "red"
             print("similarity_threshold", similarity_threshold)
             window["-DECISION-"].update(f"Similarity Decision: {decision}")
+            window["-DECISION-"].update(background_color=color)
         else:
             print("No image captured for comparison.")
 
