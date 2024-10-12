@@ -8,6 +8,7 @@ from datetime import datetime
 
 captured_image = None
 window = None
+color_window = None
 cap = None
 similarity_threshold = 0.5  # Default threshold value
 auto_compare = False  # Auto-compare mode flag
@@ -70,6 +71,7 @@ def resize_image(image, scale_factor):
 def video_capture():
     global captured_image
     global window
+    global color_window
     global cap
     global similarity_threshold
     global auto_compare
@@ -233,7 +235,20 @@ def video_capture():
         ],
     ]
 
+    color_layout = [
+        [
+            sg.Text(
+                "Similarity Color",
+                key="-COLOR-TEXT-",
+                size=(20, 1),
+                font=("Helvetica", 12),
+            )
+        ],
+        [sg.Text("", size=(40, 20), key="-COLOR-BLOCK-", background_color="red")],
+    ]
+
     window = sg.Window("Video Capture", layout, location=(800, 400))
+    color_window = sg.Window("Similarity Color", color_layout, location=(1000, 400))
 
     # Initialize Setup
     event, values = window.read(timeout=20)
@@ -261,6 +276,11 @@ def video_capture():
             print("similarity_threshold", similarity_threshold)
             window["-DECISION-"].update(f"Similarity Decision: {decision}")
             window["-DECISION-"].update(background_color=color)
+
+            # Update color window
+            color_window["-COLOR-BLOCK-"].update(background_color=color)
+            color_window["-COLOR-TEXT-"].update(f"Similarity Color: {color}")
+
         else:
             print("No image captured for comparison.")
 
@@ -269,6 +289,7 @@ def video_capture():
 
     while True:
         event, values = window.read(timeout=20)
+        color_event, color_values = color_window.read(timeout=20)
         ret, frame = cap.read()
         if not ret:
             break
@@ -339,7 +360,7 @@ def video_capture():
         imgbytes = cv2.imencode(".png", frame_resized)[1].tobytes()
         window["-IMAGE-"].update(data=imgbytes)
 
-        if event == sg.WIN_CLOSED or event == "-QUIT-":
+        if event == sg.WIN_CLOSED or event == "-QUIT-" or color_event == sg.WIN_CLOSED:
             print("Closing the window...")
             break
 
@@ -375,6 +396,7 @@ def video_capture():
     cv2.destroyAllWindows()
     print("Destroy all cv2 window")
     window.close()
+    color_window.close()
     print("Window closed")
 
 
@@ -390,4 +412,5 @@ except Exception as err:
     cv2.destroyAllWindows()
     print("Destroy all cv2 window")
     window.close()
+    color_window.close()
     print("Window closed")
