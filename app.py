@@ -11,6 +11,8 @@ window = None
 cap = None
 similarity_threshold = 0.5  # Default threshold value
 auto_compare = False  # Auto-compare mode flag
+diff_scale_factor = 1.0  # Default scale factor for difference image
+live_scale_factor = 1.0  # Default scale factor for live frame
 
 
 # Function to capture the frame inside the rectangle
@@ -57,6 +59,13 @@ def generate_filename(prefix="capture", ext=".png"):
     return f"{prefix}_{timestamp}{ext}"
 
 
+# Function to resize image based on scale factor
+def resize_image(image, scale_factor):
+    width = int(image.shape[1] * scale_factor)
+    height = int(image.shape[0] * scale_factor)
+    return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
+
+
 # Function to handle video capture and drawing
 def video_capture():
     global captured_image
@@ -64,6 +73,8 @@ def video_capture():
     global cap
     global similarity_threshold
     global auto_compare
+    global diff_scale_factor
+    global live_scale_factor
 
     # Read configuration
     config = read_config("config.json")
@@ -172,6 +183,16 @@ def video_capture():
                         ),
                         sg.Button("Update Threshold", key="-APPLY-THRESHOLD-"),
                     ],
+                    [
+                        sg.Text("Live Image Scaling"),
+                        sg.Button("+", key="-LIVEFRAME-PLUS-"),
+                        sg.Button("-", key="-LIVEFRAME-MINUS-"),
+                    ],
+                    [
+                        sg.Text("Compare Scaling"),
+                        sg.Button("+", key="-DIFF-PLUS-"),
+                        sg.Button("-", key="-DIFF-MINUS-"),
+                    ],
                 ]
             ),
             sg.Column(
@@ -217,8 +238,10 @@ def video_capture():
             live_frame = capture_frame(frame, rect)
             score, diff_image = compare_images(captured_image, live_frame)
             similarity_percentage = score * 100
-            diff_imgbytes = cv2.imencode(".png", diff_image)[1].tobytes()
-            live_imgbytes = cv2.imencode(".png", live_frame)[1].tobytes()
+            diff_image_resized = resize_image(diff_image, diff_scale_factor)
+            live_frame_resized = resize_image(live_frame, diff_scale_factor)
+            diff_imgbytes = cv2.imencode(".png", diff_image_resized)[1].tobytes()
+            live_imgbytes = cv2.imencode(".png", live_frame_resized)[1].tobytes()
             window["-CURRENTFRAME-"].update(data=live_imgbytes)
             window["-DIFF-"].update(data=diff_imgbytes)
             window["-SSIM-"].update(f"Similarity: {similarity_percentage:.2f}%")
@@ -266,6 +289,25 @@ def video_capture():
             cap.release()
             cap = cv2.VideoCapture(camera_index)
 
+        # Handle scaling events
+        if event == "-DIFF-PLUS-":
+            diff_scale_factor += 0.1
+        if event == "-DIFF-MINUS-":
+            diff_scale_factor = max(0.1, diff_scale_factor - 0.1)
+        if event == "-LIVEFRAME-PLUS-":
+            live_scale_factor += 0.1
+        if event == "-LIVEFRAME-MINUS-":
+            live_scale_factor = max(0.1, live_scale_factor - 0.1)
+
+        # Update the captured image if it exists
+        if event == "-DIFF-PLUS-" or event == "-DIFF-MINUS-":
+            if captured_image is not None:
+                captured_image_resized = resize_image(captured_image, diff_scale_factor)
+                captured_imgbytes = cv2.imencode(".png", captured_image_resized)[
+                    1
+                ].tobytes()
+                window["-CAPTURED-"].update(data=captured_imgbytes)
+
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         rect_x = int(left * frame_width)
@@ -280,7 +322,8 @@ def video_capture():
         )
 
         # Convert the frame to a format that can be displayed in PySimpleGUI
-        imgbytes = cv2.imencode(".png", frame)[1].tobytes()
+        frame_resized = resize_image(frame, live_scale_factor)
+        imgbytes = cv2.imencode(".png", frame_resized)[1].tobytes()
         window["-IMAGE-"].update(data=imgbytes)
 
         if event == sg.WIN_CLOSED or event == "-QUIT-":
