@@ -70,6 +70,16 @@ def video_capture():
     bottom = config.get("bottom", 0.8)
     left = config.get("left", 0.2)
 
+    # Read captured image if it exists and is not empty
+    if (
+        os.path.exists("captured_image.png")
+        and os.path.getsize("captured_image.png") > 0
+    ):
+        captured_image = cv2.imread("captured_image.png")
+        print("Captured image loaded successfully.")
+    else:
+        print("No captured image found or file is empty.")
+
     # cap = cv2.VideoCapture(2)
     cap = cv2.VideoCapture(0)
 
@@ -171,6 +181,13 @@ def video_capture():
 
     window = sg.Window("Video Capture", layout, location=(800, 400))
 
+    # Initialize Setup
+    event, values = window.read(timeout=20)
+    if capture_frame is not None:
+        window["-CAPTURED-"].update(
+            data=cv2.imencode(".png", captured_image)[1].tobytes()
+        )
+
     while True:
         event, values = window.read(timeout=20)
         ret, frame = cap.read()
@@ -224,7 +241,6 @@ def video_capture():
             print("Image Captured!")
 
             # Save the captured image to a file
-            # filename = generate_filename()
             filename = "captured_image.png"
             cv2.imwrite(filename, captured_image)
             print(f"Image saved as {filename}")
@@ -246,7 +262,7 @@ def video_capture():
                 decision = "Similar" if score >= similarity_threshold else "Dissimilar"
                 window["-DECISION-"].update(f"Similarity Decision: {decision}")
             else:
-                print("No image captured for comparison.")
+                print("No image captured for comparison or file is empty.")
 
     print("Closing the window...")
     cap.release()
