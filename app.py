@@ -31,8 +31,18 @@ def compare_images(image1, image2):
 
 # Function to read configuration from JSON file
 def read_config(file_path):
-    with open(file_path, "r") as file:
-        config = json.load(file)
+    default_config = {
+        "top": 0.2,
+        "right": 0.8,
+        "bottom": 0.8,
+        "left": 0.2
+    }
+    try:
+        with open(file_path, "r") as file:
+            config = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        config = default_config
+        write_config(file_path, config)
     return config
 
 
