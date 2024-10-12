@@ -34,12 +34,7 @@ def compare_images(image1, image2):
 
 # Function to read configuration from JSON file
 def read_config(file_path):
-    default_config = {
-        "top": 0.2,
-        "right": 0.8,
-        "bottom": 0.8,
-        "left": 0.2,
-    }
+    default_config = {"top": 0.2, "right": 0.8, "bottom": 0.8, "left": 0.2}
     try:
         with open(file_path, "r") as file:
             config = json.load(file)
@@ -83,10 +78,30 @@ def video_capture():
 
     layout = [
         [
-            sg.Image(filename="", key="-IMAGE-"),
-            sg.Image(filename="", key="-CAPTURED-"),
-            sg.Image(filename="", key="-DIFF-"),
-            sg.Image(filename="", key="-CURRENTFRAME-"),
+            sg.Column(
+                [
+                    [sg.Image(filename="", key="-IMAGE-")],
+                    [sg.Text("Live Frame")],
+                ]
+            ),
+            sg.Column(
+                [
+                    [sg.Image(filename="", key="-CAPTURED-")],
+                    [sg.Text("Captured Image")],
+                ]
+            ),
+            sg.Column(
+                [
+                    [sg.Image(filename="", key="-DIFF-")],
+                    [sg.Text("Difference Image")],
+                ]
+            ),
+            sg.Column(
+                [
+                    [sg.Image(filename="", key="-CURRENTFRAME-")],
+                    [sg.Text("Current Frame")],
+                ]
+            ),
         ],
         [
             sg.Button("Capture", key="-CAPTURE-"),
@@ -140,7 +155,7 @@ def video_capture():
         ],
         [sg.Button("Update Rectangle", key="-UPDATE-")],
         [
-            sg.Text("Smilarity Threshold"),
+            sg.Text("Similarity Threshold"),
             sg.Slider(
                 range=(0, 1),
                 resolution=0.01,
