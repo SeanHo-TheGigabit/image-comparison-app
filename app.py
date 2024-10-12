@@ -36,6 +36,12 @@ def read_config(file_path):
     return config
 
 
+# Function to write configuration to JSON file
+def write_config(file_path, config):
+    with open(file_path, "w") as file:
+        json.dump(config, file, indent=4)
+
+
 # Function to handle video capture and drawing
 def video_capture():
     global captured_image
@@ -55,15 +61,6 @@ def video_capture():
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 4000)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 3000)
 
-    # Define the rectangle dimensions based on the configuration
-    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    rect_x = int(left * frame_width)
-    rect_y = int(top * frame_height)
-    rect_w = int((right - left) * frame_width)
-    rect_h = int((bottom - top) * frame_height)
-    rect = (rect_x, rect_y, rect_w, rect_h)
-
     layout = [
         [
             sg.Image(filename="", key="-IMAGE-"),
@@ -77,6 +74,20 @@ def video_capture():
             sg.Button("Quit", key="-QUIT-"),
         ],
         [sg.Text("", key="-SSIM-")],
+        [sg.Text("Top"), sg.InputText(default_text=str(top), key="-TOP-", size=(5, 1))],
+        [
+            sg.Text("Right"),
+            sg.InputText(default_text=str(right), key="-RIGHT-", size=(5, 1)),
+        ],
+        [
+            sg.Text("Bottom"),
+            sg.InputText(default_text=str(bottom), key="-BOTTOM-", size=(5, 1)),
+        ],
+        [
+            sg.Text("Left"),
+            sg.InputText(default_text=str(left), key="-LEFT-", size=(5, 1)),
+        ],
+        [sg.Button("Update Rectangle", key="-UPDATE-")],
     ]
 
     window = sg.Window("Video Capture", layout, location=(800, 400))
@@ -86,6 +97,28 @@ def video_capture():
         ret, frame = cap.read()
         if not ret:
             break
+
+        # Update rectangle dimensions based on user input
+        if event == "-UPDATE-":
+            top = float(values["-TOP-"])
+            right = float(values["-RIGHT-"])
+            bottom = float(values["-BOTTOM-"])
+            left = float(values["-LEFT-"])
+
+            # Update the configuration and write to the JSON file
+            config["top"] = top
+            config["right"] = right
+            config["bottom"] = bottom
+            config["left"] = left
+            write_config("config.json", config)
+
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        rect_x = int(left * frame_width)
+        rect_y = int(top * frame_height)
+        rect_w = int((right - left) * frame_width)
+        rect_h = int((bottom - top) * frame_height)
+        rect = (rect_x, rect_y, rect_w, rect_h)
 
         # Draw a rectangle in the middle of the frame
         cv2.rectangle(
