@@ -115,17 +115,21 @@ def video_capture():
                         sg.Slider(
                             range=(0, 1),
                             orientation="h",
+                            resolution=0.01,
                             size=(20, 15),
                             default_value=top,
                             key="-TOP-",
+                            enable_events=True,  # Enable events for live update
                         ),
                         sg.Text("Bottom"),
                         sg.Slider(
                             range=(0, 1),
                             orientation="h",
+                            resolution=0.01,
                             size=(20, 15),
                             default_value=bottom,
                             key="-BOTTOM-",
+                            enable_events=True,  # Enable events for live update
                         ),
                     ],
                     [
@@ -133,20 +137,24 @@ def video_capture():
                         sg.Slider(
                             range=(0, 1),
                             orientation="h",
+                            resolution=0.01,
                             size=(20, 15),
                             default_value=left,
                             key="-LEFT-",
+                            enable_events=True,  # Enable events for live update
                         ),
                         sg.Text("Right"),
                         sg.Slider(
                             range=(0, 1),
                             orientation="h",
+                            resolution=0.01,
                             size=(20, 15),
                             default_value=right,
                             key="-RIGHT-",
+                            enable_events=True,  # Enable events for live update
                         ),
                     ],
-                    [sg.Button("Update Rectangle", key="-UPDATE-")],
+                    [sg.Button("Save Config", key="-SAVE-CONFIG-")],
                     [
                         sg.Button("Capture Reference", key="-CAPTURE-"),
                     ],
@@ -266,13 +274,14 @@ def video_capture():
             break
 
         # Update rectangle dimensions based on user input
-        if event == "-UPDATE-":
+        if event in ["-TOP-", "-RIGHT-", "-BOTTOM-", "-LEFT-"]:
             top = float(values["-TOP-"])
             right = float(values["-RIGHT-"])
             bottom = float(values["-BOTTOM-"])
             left = float(values["-LEFT-"])
 
-            # Update the configuration and write to the JSON file
+        # Save configuration to file
+        if event == "-SAVE-CONFIG-":
             config["top"] = top
             config["right"] = right
             config["bottom"] = bottom
