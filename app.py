@@ -180,8 +180,8 @@ def video_capture():
                             size=(20, 15),
                             default_value=similarity_threshold,
                             key="-THRESHOLD-",
+                            enable_events=True,  # Enable events for live update
                         ),
-                        sg.Button("Update Threshold", key="-APPLY-THRESHOLD-"),
                     ],
                     [
                         sg.Text("Live Image Scaling"),
@@ -278,8 +278,8 @@ def video_capture():
             config["left"] = left
             write_config("config.json", config)
 
-        # Update similarity threshold based on user input
-        if event == "-APPLY-THRESHOLD-":
+        # Update similarity threshold live
+        if event == "-THRESHOLD-":
             similarity_threshold = float(values["-THRESHOLD-"])
 
         # Update camera based on user input
