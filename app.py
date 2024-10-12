@@ -82,12 +82,6 @@ def video_capture():
     else:
         print("No captured image found or file is empty.")
 
-    # cap = cv2.VideoCapture(2)
-    cap = cv2.VideoCapture(0)
-
-    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 4000)
-    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 3000)
-
     layout = [
         [
             sg.Button("Quit App", key="-QUIT-"),
@@ -161,6 +155,16 @@ def video_capture():
                         ),
                     ],
                     [sg.Button("Update Threshold", key="-APPLY-THRESHOLD-")],
+                    [
+                        sg.Text("Select Camera"),
+                        sg.Combo(
+                            ["Camera 0", "Camera 1"],
+                            default_value="Camera 0",
+                            key="-CAMERA-",
+                            readonly=True,
+                        ),
+                    ],
+                    [sg.Button("Apply Camera", key="-APPLY-CAMERA-")],
                 ]
             ),
             sg.Column(
@@ -219,6 +223,9 @@ def video_capture():
         else:
             print("No image captured for comparison.")
 
+    # Default camera
+    cap = cv2.VideoCapture(0)
+
     while True:
         event, values = window.read(timeout=20)
         ret, frame = cap.read()
@@ -242,6 +249,13 @@ def video_capture():
         # Update similarity threshold based on user input
         if event == "-APPLY-THRESHOLD-":
             similarity_threshold = float(values["-THRESHOLD-"])
+
+        # Update camera based on user input
+        if event == "-APPLY-CAMERA-":
+            selected_camera = values["-CAMERA-"]
+            camera_index = 0 if selected_camera == "Camera 0" else 1
+            cap.release()
+            cap = cv2.VideoCapture(camera_index)
 
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
