@@ -114,7 +114,6 @@ def video_capture():
                         sg.Text("Top"),
                         sg.Slider(
                             range=(0, 1),
-                            resolution=0.1,
                             orientation="h",
                             size=(20, 15),
                             default_value=top,
@@ -123,7 +122,6 @@ def video_capture():
                         sg.Text("Bottom"),
                         sg.Slider(
                             range=(0, 1),
-                            resolution=0.1,
                             orientation="h",
                             size=(20, 15),
                             default_value=bottom,
@@ -134,7 +132,6 @@ def video_capture():
                         sg.Text("Left"),
                         sg.Slider(
                             range=(0, 1),
-                            resolution=0.1,
                             orientation="h",
                             size=(20, 15),
                             default_value=left,
@@ -143,7 +140,6 @@ def video_capture():
                         sg.Text("Right"),
                         sg.Slider(
                             range=(0, 1),
-                            resolution=0.1,
                             orientation="h",
                             size=(20, 15),
                             default_value=right,
@@ -169,7 +165,12 @@ def video_capture():
                             key="-DECISION-",
                             font=("Helvetica", 16),
                             background_color="red",
-                        )
+                        ),
+                        sg.Text(
+                            f"Current Threshold: {similarity_threshold*100:.2f}%",
+                            key="-CURRENT-THRESHOLD-",
+                            font=("Helvetica", 16),
+                        ),
                     ],
                     [
                         sg.Text("Similarity Threshold"),
@@ -281,6 +282,9 @@ def video_capture():
         # Update similarity threshold live
         if event == "-THRESHOLD-":
             similarity_threshold = float(values["-THRESHOLD-"])
+            window["-CURRENT-THRESHOLD-"].update(
+                f"Current Threshold: {similarity_threshold*100:.2f}%"
+            )
 
         # Update camera based on user input
         if event == "-APPLY-CAMERA-":
