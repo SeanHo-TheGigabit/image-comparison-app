@@ -10,6 +10,7 @@ captured_image = None
 window = None
 cap = None
 similarity_threshold = 0.5  # Default threshold value
+auto_compare = False  # Auto-compare mode flag
 
 
 # Function to capture the frame inside the rectangle
@@ -62,6 +63,7 @@ def video_capture():
     global window
     global cap
     global similarity_threshold
+    global auto_compare
 
     # Read configuration
     config = read_config("config.json")
@@ -88,12 +90,17 @@ def video_capture():
 
     layout = [
         [
+            sg.Button("Quit App", key="-QUIT-"),
+        ],
+        [
             sg.Column(
                 [
                     [sg.Image(filename="", key="-IMAGE-")],
                     [sg.Text("Live Frame")],
                 ]
             ),
+        ],
+        [
             sg.Column(
                 [
                     [sg.Image(filename="", key="-CAPTURED-")],
@@ -114,11 +121,14 @@ def video_capture():
             ),
         ],
         [
-            sg.Button("Capture", key="-CAPTURE-"),
-            sg.Button("Compare", key="-COMPARE-"),
-            sg.Button("Quit", key="-QUIT-"),
+            sg.Button("Capture Reference", key="-CAPTURE-"),
+        ],
+        [
+            sg.Button("Single Compare", key="-COMPARE-"),
+            sg.Button("Enable/Disable Auto Compare", key="-AUTO-COMPARE-"),
         ],
         [sg.Text("Similarity: 0.00%", key="-SSIM-")],
+        [sg.Text("Similarity Decision: ", key="-DECISION-")],
         [
             sg.Text("Top"),
             sg.Slider(
@@ -175,8 +185,7 @@ def video_capture():
                 key="-THRESHOLD-",
             ),
         ],
-        [sg.Button("Apply Threshold", key="-APPLY-THRESHOLD-")],
-        [sg.Text("Similarity Decision: ", key="-DECISION-")],
+        [sg.Button("Update Threshold", key="-APPLY-THRESHOLD-")],
     ]
 
     window = sg.Window("Video Capture", layout, location=(800, 400))
@@ -187,6 +196,24 @@ def video_capture():
         window["-CAPTURED-"].update(
             data=cv2.imencode(".png", captured_image)[1].tobytes()
         )
+
+    def run_comparison():
+        if captured_image is not None:
+            live_frame = capture_frame(frame, rect)
+            score, diff_image = compare_images(captured_image, live_frame)
+            similarity_percentage = score * 100
+            diff_imgbytes = cv2.imencode(".png", diff_image)[1].tobytes()
+            live_imgbytes = cv2.imencode(".png", live_frame)[1].tobytes()
+            window["-CURRENTFRAME-"].update(data=live_imgbytes)
+            window["-DIFF-"].update(data=diff_imgbytes)
+            window["-SSIM-"].update(f"Similarity: {similarity_percentage:.2f}%")
+
+            # Determine similarity decision
+            decision = "Similar" if score >= similarity_threshold else "Dissimilar"
+            print("similarity_threshold", similarity_threshold)
+            window["-DECISION-"].update(f"Similarity Decision: {decision}")
+        else:
+            print("No image captured for comparison.")
 
     while True:
         event, values = window.read(timeout=20)
@@ -247,22 +274,17 @@ def video_capture():
 
         if event == "-COMPARE-":
             print("Comparing images...")
-            if captured_image is not None:
-                live_frame = capture_frame(frame, rect)
-                score, diff_image = compare_images(captured_image, live_frame)
-                similarity_percentage = score * 100
-                diff_imgbytes = cv2.imencode(".png", diff_image)[1].tobytes()
-                live_imgbytes = cv2.imencode(".png", live_frame)[1].tobytes()
-                window["-IMAGE-"].update(data=live_imgbytes)
-                window["-CURRENTFRAME-"].update(data=live_imgbytes)
-                window["-DIFF-"].update(data=diff_imgbytes)
-                window["-SSIM-"].update(f"Similarity: {similarity_percentage:.2f}%")
+            run_comparison()
 
-                # Determine similarity decision
-                decision = "Similar" if score >= similarity_threshold else "Dissimilar"
-                window["-DECISION-"].update(f"Similarity Decision: {decision}")
+        if event == "-AUTO-COMPARE-":
+            auto_compare = not auto_compare
+            if auto_compare:
+                print("Auto-compare mode enabled.")
             else:
-                print("No image captured for comparison or file is empty.")
+                print("Auto-compare mode disabled.")
+
+        if auto_compare:
+            run_comparison()
 
     print("Closing the window...")
     cap.release()
