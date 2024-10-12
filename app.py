@@ -1,17 +1,19 @@
 import cv2
 from skimage.metrics import structural_similarity as ssim
 import numpy as np
-# import FreeSimpleGUIWeb as sg
 import FreeSimpleGUI as sg
+import json
 
 captured_image = None
 window = None
 cap = None
 
+
 # Function to capture the frame inside the rectangle
 def capture_frame(frame, rect):
     x, y, w, h = rect
     return frame[y : y + h, x : x + w]
+
 
 # Function to compare the captured image with the live frame inside the rectangle
 def compare_images(image1, image2):
@@ -26,11 +28,26 @@ def compare_images(image1, image2):
     print(f"SSIM Score: {score:.4f}")
     return score, diff
 
+
+# Function to read configuration from JSON file
+def read_config(file_path):
+    with open(file_path, "r") as file:
+        config = json.load(file)
+    return config
+
+
 # Function to handle video capture and drawing
 def video_capture():
     global captured_image
     global window
     global cap
+
+    # Read configuration
+    config = read_config("config.json")
+    top = config.get("top", 0.2)
+    right = config.get("right", 0.8)
+    bottom = config.get("bottom", 0.8)
+    left = config.get("left", 0.2)
 
     # cap = cv2.VideoCapture(2)
     cap = cv2.VideoCapture(0)
@@ -38,21 +55,30 @@ def video_capture():
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 4000)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 3000)
 
-    # Define the rectangle dimensions (centered on screen)
+    # Define the rectangle dimensions based on the configuration
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    rect_w, rect_h = 200, 200  # Rectangle dimensions
-    rect_x = (frame_width - rect_w) // 2
-    rect_y = (frame_height - rect_h) // 2
+    rect_x = int(left * frame_width)
+    rect_y = int(top * frame_height)
+    rect_w = int((right - left) * frame_width)
+    rect_h = int((bottom - top) * frame_height)
     rect = (rect_x, rect_y, rect_w, rect_h)
 
     layout = [
-        [sg.Image(filename="", key="-IMAGE-"), sg.Image(filename="", key="-CAPTURED-"), sg.Image(filename="", key="-DIFF-"), sg.Image(filename="", key="-CURRENTFRAME-")],
-        [sg.Button("Capture", key="-CAPTURE-"), sg.Button("Compare", key="-COMPARE-"), sg.Button("Quit", key="-QUIT-")],
-        [sg.Text("", key="-SSIM-")]
+        [
+            sg.Image(filename="", key="-IMAGE-"),
+            sg.Image(filename="", key="-CAPTURED-"),
+            sg.Image(filename="", key="-DIFF-"),
+            sg.Image(filename="", key="-CURRENTFRAME-"),
+        ],
+        [
+            sg.Button("Capture", key="-CAPTURE-"),
+            sg.Button("Compare", key="-COMPARE-"),
+            sg.Button("Quit", key="-QUIT-"),
+        ],
+        [sg.Text("", key="-SSIM-")],
     ]
 
-    # window = sg.Window("Video Capture", layout, location=(800, 400), web_port=8080, web_start_browser=True)
     window = sg.Window("Video Capture", layout, location=(800, 400))
 
     while True:
@@ -62,7 +88,9 @@ def video_capture():
             break
 
         # Draw a rectangle in the middle of the frame
-        cv2.rectangle(frame, (rect_x, rect_y), (rect_x + rect_w, rect_y + rect_h), (0, 255, 0), 2)
+        cv2.rectangle(
+            frame, (rect_x, rect_y), (rect_x + rect_w, rect_y + rect_h), (0, 255, 0), 2
+        )
 
         # Convert the frame to a format that can be displayed in PySimpleGUI
         imgbytes = cv2.imencode(".png", frame)[1].tobytes()
@@ -101,6 +129,7 @@ def video_capture():
     window.close()
     print("Window closed")
 
+
 # Run the video capture
 try:
     video_capture()
@@ -114,4 +143,3 @@ except Exception as err:
     print("Destroy all cv2 window")
     window.close()
     print("Window closed")
-
