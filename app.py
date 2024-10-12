@@ -95,6 +95,76 @@ def video_capture():
         [
             sg.Column(
                 [
+                    [
+                        sg.Button("Capture Reference", key="-CAPTURE-"),
+                    ],
+                    [
+                        sg.Button("Single Compare", key="-COMPARE-"),
+                        sg.Button("Enable/Disable Auto Compare", key="-AUTO-COMPARE-"),
+                    ],
+                    [sg.Text("Similarity: 0.00%", key="-SSIM-")],
+                    [sg.Text("Similarity Decision: ", key="-DECISION-")],
+                    [
+                        sg.Text("Top"),
+                        sg.Slider(
+                            range=(0, 1),
+                            resolution=0.1,
+                            orientation="h",
+                            size=(20, 15),
+                            default_value=top,
+                            key="-TOP-",
+                        ),
+                    ],
+                    [
+                        sg.Text("Right"),
+                        sg.Slider(
+                            range=(0, 1),
+                            resolution=0.1,
+                            orientation="h",
+                            size=(20, 15),
+                            default_value=right,
+                            key="-RIGHT-",
+                        ),
+                    ],
+                    [
+                        sg.Text("Bottom"),
+                        sg.Slider(
+                            range=(0, 1),
+                            resolution=0.1,
+                            orientation="h",
+                            size=(20, 15),
+                            default_value=bottom,
+                            key="-BOTTOM-",
+                        ),
+                    ],
+                    [
+                        sg.Text("Left"),
+                        sg.Slider(
+                            range=(0, 1),
+                            resolution=0.1,
+                            orientation="h",
+                            size=(20, 15),
+                            default_value=left,
+                            key="-LEFT-",
+                        ),
+                    ],
+                    [sg.Button("Update Rectangle", key="-UPDATE-")],
+                    [
+                        sg.Text("Similarity Threshold"),
+                        sg.Slider(
+                            range=(0, 1),
+                            resolution=0.01,
+                            orientation="h",
+                            size=(20, 15),
+                            default_value=similarity_threshold,
+                            key="-THRESHOLD-",
+                        ),
+                    ],
+                    [sg.Button("Update Threshold", key="-APPLY-THRESHOLD-")],
+                ]
+            ),
+            sg.Column(
+                [
                     [sg.Image(filename="", key="-IMAGE-")],
                     [sg.Text("Live Frame")],
                 ]
@@ -120,72 +190,6 @@ def video_capture():
                 ]
             ),
         ],
-        [
-            sg.Button("Capture Reference", key="-CAPTURE-"),
-        ],
-        [
-            sg.Button("Single Compare", key="-COMPARE-"),
-            sg.Button("Enable/Disable Auto Compare", key="-AUTO-COMPARE-"),
-        ],
-        [sg.Text("Similarity: 0.00%", key="-SSIM-")],
-        [sg.Text("Similarity Decision: ", key="-DECISION-")],
-        [
-            sg.Text("Top"),
-            sg.Slider(
-                range=(0, 1),
-                resolution=0.1,
-                orientation="h",
-                size=(20, 15),
-                default_value=top,
-                key="-TOP-",
-            ),
-        ],
-        [
-            sg.Text("Right"),
-            sg.Slider(
-                range=(0, 1),
-                resolution=0.1,
-                orientation="h",
-                size=(20, 15),
-                default_value=right,
-                key="-RIGHT-",
-            ),
-        ],
-        [
-            sg.Text("Bottom"),
-            sg.Slider(
-                range=(0, 1),
-                resolution=0.1,
-                orientation="h",
-                size=(20, 15),
-                default_value=bottom,
-                key="-BOTTOM-",
-            ),
-        ],
-        [
-            sg.Text("Left"),
-            sg.Slider(
-                range=(0, 1),
-                resolution=0.1,
-                orientation="h",
-                size=(20, 15),
-                default_value=left,
-                key="-LEFT-",
-            ),
-        ],
-        [sg.Button("Update Rectangle", key="-UPDATE-")],
-        [
-            sg.Text("Similarity Threshold"),
-            sg.Slider(
-                range=(0, 1),
-                resolution=0.01,
-                orientation="h",
-                size=(20, 15),
-                default_value=similarity_threshold,
-                key="-THRESHOLD-",
-            ),
-        ],
-        [sg.Button("Update Threshold", key="-APPLY-THRESHOLD-")],
     ]
 
     window = sg.Window("Video Capture", layout, location=(800, 400))
