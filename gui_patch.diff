@@ -1,0 +1,13 @@
+--- "gui copy.py"	2024-10-07 22:45:47.924270709 +0800
++++ gui.py	2024-10-07 22:46:38.798852768 +0800
+@@ -42,6 +42,10 @@
+         # Python 3.4+
+         import html
+         unescape = html.unescape
++    except AttributeError:
++        # Python 3.4+
++        import html
++        unescape = html.unescape
+ 
+ from .server import runtimeInstances
+ 

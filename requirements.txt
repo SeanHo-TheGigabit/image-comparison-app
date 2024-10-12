@@ -1,3 +1,4 @@
 opencv-python
 scikit-image
-FreeSimpleGUIWeb
+# FreeSimpleGUIWeb
+FreeSimpleGUI

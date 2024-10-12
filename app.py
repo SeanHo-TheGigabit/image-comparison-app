@@ -1,7 +1,8 @@
 import cv2
 from skimage.metrics import structural_similarity as ssim
 import numpy as np
-import FreeSimpleGUIWeb as sg
+# import FreeSimpleGUIWeb as sg
+import FreeSimpleGUI as sg
 
 captured_image = None
 window = None
@@ -51,7 +52,8 @@ def video_capture():
         [sg.Text("", key="-SSIM-")]
     ]
 
-    window = sg.Window("Video Capture", layout, location=(800, 400), web_port=8080, web_start_browser=True)
+    # window = sg.Window("Video Capture", layout, location=(800, 400), web_port=8080, web_start_browser=True)
+    window = sg.Window("Video Capture", layout, location=(800, 400))
 
     while True:
         event, values = window.read(timeout=20)
