@@ -90,14 +90,15 @@ def video_capture():
             sg.Column(
                 [
                     [
-                        sg.Button("Capture Reference", key="-CAPTURE-"),
+                        sg.Text("Select Camera"),
+                        sg.Combo(
+                            ["Camera 0", "Camera 1"],
+                            default_value="Camera 0",
+                            key="-CAMERA-",
+                            readonly=True,
+                        ),
+                        sg.Button("Apply Camera", key="-APPLY-CAMERA-"),
                     ],
-                    [
-                        sg.Button("Single Compare", key="-COMPARE-"),
-                        sg.Button("Enable/Disable Auto Compare", key="-AUTO-COMPARE-"),
-                    ],
-                    [sg.Text("Similarity: 0.00%", key="-SSIM-",font=("Helvetica", 16))],
-                    [sg.Text("Similarity Decision: ", key="-DECISION-",font=("Helvetica", 16),background_color="red")],
                     [
                         sg.Text("Top"),
                         sg.Slider(
@@ -108,19 +109,6 @@ def video_capture():
                             default_value=top,
                             key="-TOP-",
                         ),
-                    ],
-                    [
-                        sg.Text("Right"),
-                        sg.Slider(
-                            range=(0, 1),
-                            resolution=0.1,
-                            orientation="h",
-                            size=(20, 15),
-                            default_value=right,
-                            key="-RIGHT-",
-                        ),
-                    ],
-                    [
                         sg.Text("Bottom"),
                         sg.Slider(
                             range=(0, 1),
@@ -141,8 +129,37 @@ def video_capture():
                             default_value=left,
                             key="-LEFT-",
                         ),
+                        sg.Text("Right"),
+                        sg.Slider(
+                            range=(0, 1),
+                            resolution=0.1,
+                            orientation="h",
+                            size=(20, 15),
+                            default_value=right,
+                            key="-RIGHT-",
+                        ),
                     ],
                     [sg.Button("Update Rectangle", key="-UPDATE-")],
+                    [
+                        sg.Button("Capture Reference", key="-CAPTURE-"),
+                    ],
+                    [
+                        sg.Button("Single Compare", key="-COMPARE-"),
+                        sg.Button("Enable/Disable Auto Compare", key="-AUTO-COMPARE-"),
+                    ],
+                    [
+                        sg.Text(
+                            "Similarity: 0.00%", key="-SSIM-", font=("Helvetica", 16)
+                        )
+                    ],
+                    [
+                        sg.Text(
+                            "Similarity Decision: ",
+                            key="-DECISION-",
+                            font=("Helvetica", 16),
+                            background_color="red",
+                        )
+                    ],
                     [
                         sg.Text("Similarity Threshold"),
                         sg.Slider(
@@ -153,18 +170,8 @@ def video_capture():
                             default_value=similarity_threshold,
                             key="-THRESHOLD-",
                         ),
+                        sg.Button("Update Threshold", key="-APPLY-THRESHOLD-"),
                     ],
-                    [sg.Button("Update Threshold", key="-APPLY-THRESHOLD-")],
-                    [
-                        sg.Text("Select Camera"),
-                        sg.Combo(
-                            ["Camera 0", "Camera 1"],
-                            default_value="Camera 0",
-                            key="-CAMERA-",
-                            readonly=True,
-                        ),
-                    ],
-                    [sg.Button("Apply Camera", key="-APPLY-CAMERA-")],
                 ]
             ),
             sg.Column(
