@@ -3,10 +3,13 @@ from skimage.metrics import structural_similarity as ssim
 import numpy as np
 import FreeSimpleGUI as sg
 import json
+import os
+from datetime import datetime
 
 captured_image = None
 window = None
 cap = None
+similarity_threshold = 0.5  # Default threshold value
 
 
 # Function to capture the frame inside the rectangle
@@ -35,7 +38,7 @@ def read_config(file_path):
         "top": 0.2,
         "right": 0.8,
         "bottom": 0.8,
-        "left": 0.2
+        "left": 0.2,
     }
     try:
         with open(file_path, "r") as file:
@@ -52,11 +55,18 @@ def write_config(file_path, config):
         json.dump(config, file, indent=4)
 
 
+# Function to generate a unique filename
+def generate_filename(prefix="capture", ext=".png"):
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{prefix}_{timestamp}{ext}"
+
+
 # Function to handle video capture and drawing
 def video_capture():
     global captured_image
     global window
     global cap
+    global similarity_threshold
 
     # Read configuration
     config = read_config("config.json")
@@ -129,6 +139,19 @@ def video_capture():
             ),
         ],
         [sg.Button("Update Rectangle", key="-UPDATE-")],
+        [
+            sg.Text("Smilarity Threshold"),
+            sg.Slider(
+                range=(0, 1),
+                resolution=0.01,
+                orientation="h",
+                size=(20, 15),
+                default_value=similarity_threshold,
+                key="-THRESHOLD-",
+            ),
+        ],
+        [sg.Button("Apply Threshold", key="-APPLY-THRESHOLD-")],
+        [sg.Text("Similarity Decision: ", key="-DECISION-")],
     ]
 
     window = sg.Window("Video Capture", layout, location=(800, 400))
@@ -152,6 +175,10 @@ def video_capture():
             config["bottom"] = bottom
             config["left"] = left
             write_config("config.json", config)
+
+        # Update similarity threshold based on user input
+        if event == "-APPLY-THRESHOLD-":
+            similarity_threshold = float(values["-THRESHOLD-"])
 
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -181,6 +208,12 @@ def video_capture():
             window["-CAPTURED-"].update(data=captured_imgbytes)
             print("Image Captured!")
 
+            # Save the captured image to a file
+            # filename = generate_filename()
+            filename = "captured_image.png"
+            cv2.imwrite(filename, captured_image)
+            print(f"Image saved as {filename}")
+
         if event == "-COMPARE-":
             print("Comparing images...")
             if captured_image is not None:
@@ -193,6 +226,10 @@ def video_capture():
                 window["-CURRENTFRAME-"].update(data=live_imgbytes)
                 window["-DIFF-"].update(data=diff_imgbytes)
                 window["-SSIM-"].update(f"Similarity: {similarity_percentage:.2f}%")
+
+                # Determine similarity decision
+                decision = "Similar" if score >= similarity_threshold else "Dissimilar"
+                window["-DECISION-"].update(f"Similarity Decision: {decision}")
             else:
                 print("No image captured for comparison.")
 
