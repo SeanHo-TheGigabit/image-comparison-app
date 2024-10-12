@@ -83,7 +83,7 @@ def video_capture():
             sg.Button("Compare", key="-COMPARE-"),
             sg.Button("Quit", key="-QUIT-"),
         ],
-        [sg.Text("", key="-SSIM-")],
+        [sg.Text("Similarity: 0.00%", key="-SSIM-")],
         [
             sg.Text("Top"),
             sg.Slider(
@@ -186,12 +186,13 @@ def video_capture():
             if captured_image is not None:
                 live_frame = capture_frame(frame, rect)
                 score, diff_image = compare_images(captured_image, live_frame)
+                similarity_percentage = score * 100
                 diff_imgbytes = cv2.imencode(".png", diff_image)[1].tobytes()
                 live_imgbytes = cv2.imencode(".png", live_frame)[1].tobytes()
                 window["-IMAGE-"].update(data=live_imgbytes)
                 window["-CURRENTFRAME-"].update(data=live_imgbytes)
                 window["-DIFF-"].update(data=diff_imgbytes)
-                window["-SSIM-"].update(f"SSIM Score: {score:.4f}")
+                window["-SSIM-"].update(f"Similarity: {similarity_percentage:.2f}%")
             else:
                 print("No image captured for comparison.")
 
