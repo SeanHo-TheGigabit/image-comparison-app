@@ -74,18 +74,49 @@ def video_capture():
             sg.Button("Quit", key="-QUIT-"),
         ],
         [sg.Text("", key="-SSIM-")],
-        [sg.Text("Top"), sg.InputText(default_text=str(top), key="-TOP-", size=(5, 1))],
+        [
+            sg.Text("Top"),
+            sg.Slider(
+                range=(0, 1),
+                resolution=0.1,
+                orientation="h",
+                size=(20, 15),
+                default_value=top,
+                key="-TOP-",
+            ),
+        ],
         [
             sg.Text("Right"),
-            sg.InputText(default_text=str(right), key="-RIGHT-", size=(5, 1)),
+            sg.Slider(
+                range=(0, 1),
+                resolution=0.1,
+                orientation="h",
+                size=(20, 15),
+                default_value=right,
+                key="-RIGHT-",
+            ),
         ],
         [
             sg.Text("Bottom"),
-            sg.InputText(default_text=str(bottom), key="-BOTTOM-", size=(5, 1)),
+            sg.Slider(
+                range=(0, 1),
+                resolution=0.1,
+                orientation="h",
+                size=(20, 15),
+                default_value=bottom,
+                key="-BOTTOM-",
+            ),
         ],
         [
             sg.Text("Left"),
-            sg.InputText(default_text=str(left), key="-LEFT-", size=(5, 1)),
+            sg.Slider(
+                range=(0, 1),
+                resolution=0.1,
+                orientation="h",
+                size=(20, 15),
+                default_value=left,
+                key="-LEFT-",
+            ),
         ],
         [sg.Button("Update Rectangle", key="-UPDATE-")],
     ]
