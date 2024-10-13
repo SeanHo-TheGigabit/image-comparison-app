@@ -254,14 +254,34 @@ def video_capture():
                             "Actions",
                             [
                                 [
-                                    sg.Button("Capture Reference", key="-CAPTURE-", size=(20, 1)),
+                                    sg.Button(
+                                        "Capture Reference",
+                                        key="-CAPTURE-",
+                                        size=(20, 1),
+                                    ),
                                 ],
                                 [
-                                    sg.Button("Single Compare", key="-COMPARE-", size=(20, 1)),
+                                    sg.Button(
+                                        "Single Compare", key="-COMPARE-", size=(20, 1)
+                                    ),
                                     sg.Button(
                                         "Enable/Disable Auto Compare",
                                         key="-AUTO-COMPARE-",
                                     ),
+                                ],
+                            ],
+                        ),
+                    ],
+                    [
+                        sg.Frame(
+                            "Important Info",
+                            [
+                                [
+                                    sg.Text(
+                                        "Capture new reference image if you change the stream or rectangle size to avoid stream fail.",
+                                        font=("Helvetica", 12),
+                                        size=(42, 2),
+                                    )
                                 ],
                             ],
                         ),
