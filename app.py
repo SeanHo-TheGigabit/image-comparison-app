@@ -254,10 +254,10 @@ def video_capture():
                             "Actions",
                             [
                                 [
-                                    sg.Button("Capture Reference", key="-CAPTURE-"),
+                                    sg.Button("Capture Reference", key="-CAPTURE-", size=(20, 1)),
                                 ],
                                 [
-                                    sg.Button("Single Compare", key="-COMPARE-"),
+                                    sg.Button("Single Compare", key="-COMPARE-", size=(20, 1)),
                                     sg.Button(
                                         "Enable/Disable Auto Compare",
                                         key="-AUTO-COMPARE-",
@@ -309,8 +309,12 @@ def video_capture():
         [sg.Text("", size=(40, 20), key="-COLOR-BLOCK-", background_color="red")],
     ]
 
-    window = sg.Window("Video Capture", layout, location=(800, 400))
-    color_window = sg.Window("Similarity Color", color_layout, location=(1000, 400))
+    window = sg.Window(
+        "Video Capture", layout, location=(0, 0)
+    )  # Set location to top-left corner
+    color_window = sg.Window(
+        "Similarity Color", color_layout, location=(300, 0)
+    )  # Adjust location as needed
 
     # Initialize Setup
     event, values = window.read(timeout=20)
