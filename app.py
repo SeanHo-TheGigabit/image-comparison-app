@@ -34,7 +34,6 @@ def compare_images(image1, image2):
     score, diff = ssim(image1_gray, image2_gray, full=True)
     diff = (diff * 255).astype("uint8")
 
-    print(f"SSIM Score: {score:.4f}")
     return score, diff
 
 
@@ -107,132 +106,165 @@ def video_capture():
             sg.Column(
                 [
                     [
-                        sg.Text(f"Stream Width: ", key="-WIDTH-TEXT-"),
-                        sg.Slider(
-                            range=(320, 1920),
-                            orientation="h",
-                            resolution=1,
-                            size=(20, 15),
-                            default_value=stream_width,
-                            key="-WIDTH-",
-                            enable_events=True,  # Enable events for live update
+                        sg.Frame(
+                            "Stream Settings",
+                            [
+                                [
+                                    sg.Text(f"Stream Width:  ", key="-WIDTH-TEXT-"),
+                                    sg.Slider(
+                                        range=(320, 1920),
+                                        orientation="h",
+                                        resolution=1,
+                                        size=(20, 15),
+                                        default_value=stream_width,
+                                        key="-WIDTH-",
+                                        enable_events=True,  # Enable events for live update
+                                    ),
+                                ],
+                                [
+                                    sg.Text(f"Stream Height: ", key="-HEIGHT-TEXT-"),
+                                    sg.Slider(
+                                        range=(240, 1080),
+                                        orientation="h",
+                                        resolution=1,
+                                        size=(20, 15),
+                                        default_value=stream_height,
+                                        key="-HEIGHT-",
+                                        enable_events=True,  # Enable events for live update
+                                    ),
+                                ],
+                            ],
                         ),
                     ],
                     [
-                        sg.Text(f"Stream Height: ", key="-HEIGHT-TEXT-"),
-                        sg.Slider(
-                            range=(240, 1080),
-                            orientation="h",
-                            resolution=1,
-                            size=(20, 15),
-                            default_value=stream_height,
-                            key="-HEIGHT-",
-                            enable_events=True,  # Enable events for live update
+                        sg.Frame(
+                            "Camera and Rectangle Settings",
+                            [
+                                [
+                                    sg.Text("Select Camera"),
+                                    sg.Combo(
+                                        ["Camera 0", "Camera 1"],
+                                        default_value="Camera 0",
+                                        key="-CAMERA-",
+                                        readonly=True,
+                                    ),
+                                    sg.Button("Apply Camera", key="-APPLY-CAMERA-"),
+                                ],
+                                [
+                                    sg.Text("Top"),
+                                    sg.Slider(
+                                        range=(0, 1),
+                                        orientation="h",
+                                        resolution=0.01,
+                                        size=(20, 15),
+                                        default_value=top,
+                                        key="-TOP-",
+                                        enable_events=True,  # Enable events for live update
+                                    ),
+                                    sg.Text("Bottom"),
+                                    sg.Slider(
+                                        range=(0, 1),
+                                        orientation="h",
+                                        resolution=0.01,
+                                        size=(20, 15),
+                                        default_value=bottom,
+                                        key="-BOTTOM-",
+                                        enable_events=True,  # Enable events for live update
+                                    ),
+                                ],
+                                [
+                                    sg.Text("Left"),
+                                    sg.Slider(
+                                        range=(0, 1),
+                                        orientation="h",
+                                        resolution=0.01,
+                                        size=(20, 15),
+                                        default_value=left,
+                                        key="-LEFT-",
+                                        enable_events=True,  # Enable events for live update
+                                    ),
+                                    sg.Text("Right   "),
+                                    sg.Slider(
+                                        range=(0, 1),
+                                        orientation="h",
+                                        resolution=0.01,
+                                        size=(20, 15),
+                                        default_value=right,
+                                        key="-RIGHT-",
+                                        enable_events=True,  # Enable events for live update
+                                    ),
+                                ],
+                                [sg.Button("Save Config", key="-SAVE-CONFIG-")],
+                            ],
                         ),
                     ],
                     [
-                        sg.Text("Select Camera"),
-                        sg.Combo(
-                            ["Camera 0", "Camera 1"],
-                            default_value="Camera 0",
-                            key="-CAMERA-",
-                            readonly=True,
-                        ),
-                        sg.Button("Apply Camera", key="-APPLY-CAMERA-"),
-                    ],
-                    [
-                        sg.Text("Top"),
-                        sg.Slider(
-                            range=(0, 1),
-                            orientation="h",
-                            resolution=0.01,
-                            size=(20, 15),
-                            default_value=top,
-                            key="-TOP-",
-                            enable_events=True,  # Enable events for live update
-                        ),
-                        sg.Text("Bottom"),
-                        sg.Slider(
-                            range=(0, 1),
-                            orientation="h",
-                            resolution=0.01,
-                            size=(20, 15),
-                            default_value=bottom,
-                            key="-BOTTOM-",
-                            enable_events=True,  # Enable events for live update
-                        ),
-                    ],
-                    [
-                        sg.Text("Left"),
-                        sg.Slider(
-                            range=(0, 1),
-                            orientation="h",
-                            resolution=0.01,
-                            size=(20, 15),
-                            default_value=left,
-                            key="-LEFT-",
-                            enable_events=True,  # Enable events for live update
-                        ),
-                        sg.Text("Right"),
-                        sg.Slider(
-                            range=(0, 1),
-                            orientation="h",
-                            resolution=0.01,
-                            size=(20, 15),
-                            default_value=right,
-                            key="-RIGHT-",
-                            enable_events=True,  # Enable events for live update
-                        ),
-                    ],
-                    [sg.Button("Save Config", key="-SAVE-CONFIG-")],
-                    [
-                        sg.Button("Capture Reference", key="-CAPTURE-"),
-                    ],
-                    [
-                        sg.Button("Single Compare", key="-COMPARE-"),
-                        sg.Button("Enable/Disable Auto Compare", key="-AUTO-COMPARE-"),
-                    ],
-                    [
-                        sg.Text(
-                            "Similarity: 0.00%", key="-SSIM-", font=("Helvetica", 16)
-                        )
-                    ],
-                    [
-                        sg.Text(
-                            f"Current Threshold: {similarity_threshold*100:.2f}%",
-                            key="-CURRENT-THRESHOLD-",
-                            font=("Helvetica", 16),
+                        sg.Frame(
+                            "Similarity and Scaling",
+                            [
+                                [
+                                    sg.Text(
+                                        "Similarity               : 0.00%",
+                                        key="-SSIM-",
+                                        font=("Helvetica", 16),
+                                    )
+                                ],
+                                [
+                                    sg.Text(
+                                        f"Current Threshold : {similarity_threshold*100:.2f}%",
+                                        key="-CURRENT-THRESHOLD-",
+                                        font=("Helvetica", 16),
+                                    ),
+                                ],
+                                [
+                                    sg.Text(
+                                        "Similarity Decision: ",
+                                        key="-DECISION-",
+                                        font=("Helvetica", 16),
+                                        background_color="red",
+                                    ),
+                                ],
+                                [
+                                    sg.Text("Similarity Threshold"),
+                                    sg.Slider(
+                                        range=(0, 1),
+                                        resolution=0.01,
+                                        orientation="h",
+                                        size=(20, 15),
+                                        default_value=similarity_threshold,
+                                        key="-THRESHOLD-",
+                                        enable_events=True,  # Enable events for live update
+                                    ),
+                                ],
+                                [
+                                    sg.Text("Live Image Scaling"),
+                                    sg.Button("+", key="-LIVEFRAME-PLUS-"),
+                                    sg.Button("-", key="-LIVEFRAME-MINUS-"),
+                                ],
+                                [
+                                    sg.Text("Compare Scaling   "),
+                                    sg.Button("+", key="-DIFF-PLUS-"),
+                                    sg.Button("-", key="-DIFF-MINUS-"),
+                                ],
+                            ],
                         ),
                     ],
                     [
-                        sg.Text(
-                            "Similarity Decision: ",
-                            key="-DECISION-",
-                            font=("Helvetica", 16),
-                            background_color="red",
+                        sg.Frame(
+                            "Actions",
+                            [
+                                [
+                                    sg.Button("Capture Reference", key="-CAPTURE-"),
+                                ],
+                                [
+                                    sg.Button("Single Compare", key="-COMPARE-"),
+                                    sg.Button(
+                                        "Enable/Disable Auto Compare",
+                                        key="-AUTO-COMPARE-",
+                                    ),
+                                ],
+                            ],
                         ),
-                    ],
-                    [
-                        sg.Text("Similarity Threshold"),
-                        sg.Slider(
-                            range=(0, 1),
-                            resolution=0.01,
-                            orientation="h",
-                            size=(20, 15),
-                            default_value=similarity_threshold,
-                            key="-THRESHOLD-",
-                            enable_events=True,  # Enable events for live update
-                        ),
-                    ],
-                    [
-                        sg.Text("Live Image Scaling"),
-                        sg.Button("+", key="-LIVEFRAME-PLUS-"),
-                        sg.Button("-", key="-LIVEFRAME-MINUS-"),
-                    ],
-                    [
-                        sg.Text("Compare Scaling"),
-                        sg.Button("+", key="-DIFF-PLUS-"),
-                        sg.Button("-", key="-DIFF-MINUS-"),
                     ],
                 ]
             ),
@@ -298,12 +330,13 @@ def video_capture():
             live_imgbytes = cv2.imencode(".png", live_frame_resized)[1].tobytes()
             window["-CURRENTFRAME-"].update(data=live_imgbytes)
             window["-DIFF-"].update(data=diff_imgbytes)
-            window["-SSIM-"].update(f"Similarity: {similarity_percentage:.2f}%")
+            window["-SSIM-"].update(
+                f"Similarity               : {similarity_percentage:.2f}%"
+            )
 
             # Determine similarity decision
             decision = "Similar" if score >= similarity_threshold else "Dissimilar"
             color = "green" if score >= similarity_threshold else "red"
-            print("similarity_threshold", similarity_threshold)
             window["-DECISION-"].update(f"Similarity Decision: {decision}")
             window["-DECISION-"].update(background_color=color)
 
@@ -345,7 +378,7 @@ def video_capture():
         if event == "-THRESHOLD-":
             similarity_threshold = float(values["-THRESHOLD-"])
             window["-CURRENT-THRESHOLD-"].update(
-                f"Current Threshold: {similarity_threshold*100:.2f}%"
+                f"Current Threshold : {similarity_threshold*100:.2f}%"
             )
 
         # Update camera based on user input
@@ -354,6 +387,8 @@ def video_capture():
             camera_index = 0 if selected_camera == "Camera 0" else 1
             cap.release()
             cap = cv2.VideoCapture(camera_index)
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, stream_width)
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, stream_height)
 
         # Handle scaling events
         if event == "-DIFF-PLUS-":
