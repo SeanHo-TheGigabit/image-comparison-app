@@ -14,6 +14,8 @@ similarity_threshold = 0.5  # Default threshold value
 auto_compare = False  # Auto-compare mode flag
 diff_scale_factor = 1.0  # Default scale factor for difference image
 live_scale_factor = 1.0  # Default scale factor for live frame
+stream_width = 640  # Default stream width
+stream_height = 480  # Default stream height
 
 
 # Function to capture the frame inside the rectangle
@@ -77,6 +79,8 @@ def video_capture():
     global auto_compare
     global diff_scale_factor
     global live_scale_factor
+    global stream_width
+    global stream_height
 
     # Read configuration
     config = read_config("config.json")
@@ -102,6 +106,30 @@ def video_capture():
         [
             sg.Column(
                 [
+                    [
+                        sg.Text(f"Stream Width: ", key="-WIDTH-TEXT-"),
+                        sg.Slider(
+                            range=(320, 1920),
+                            orientation="h",
+                            resolution=1,
+                            size=(20, 15),
+                            default_value=stream_width,
+                            key="-WIDTH-",
+                            enable_events=True,  # Enable events for live update
+                        ),
+                    ],
+                    [
+                        sg.Text(f"Stream Height: ", key="-HEIGHT-TEXT-"),
+                        sg.Slider(
+                            range=(240, 1080),
+                            orientation="h",
+                            resolution=1,
+                            size=(20, 15),
+                            default_value=stream_height,
+                            key="-HEIGHT-",
+                            enable_events=True,  # Enable events for live update
+                        ),
+                    ],
                     [
                         sg.Text("Select Camera"),
                         sg.Combo(
@@ -171,15 +199,17 @@ def video_capture():
                     ],
                     [
                         sg.Text(
+                            f"Current Threshold: {similarity_threshold*100:.2f}%",
+                            key="-CURRENT-THRESHOLD-",
+                            font=("Helvetica", 16),
+                        ),
+                    ],
+                    [
+                        sg.Text(
                             "Similarity Decision: ",
                             key="-DECISION-",
                             font=("Helvetica", 16),
                             background_color="red",
-                        ),
-                        sg.Text(
-                            f"Current Threshold: {similarity_threshold*100:.2f}%",
-                            key="-CURRENT-THRESHOLD-",
-                            font=("Helvetica", 16),
                         ),
                     ],
                     [
@@ -286,6 +316,8 @@ def video_capture():
 
     # Default camera
     cap = cv2.VideoCapture(0)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, stream_width)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, stream_height)
 
     while True:
         event, values = window.read(timeout=20)
@@ -342,6 +374,14 @@ def video_capture():
                 ].tobytes()
                 window["-CAPTURED-"].update(data=captured_imgbytes)
 
+        # Update stream width and height
+        if event == "-WIDTH-":
+            stream_width = int(values["-WIDTH-"])
+            cap.set(cv2.CAP_PROP_FRAME_WIDTH, stream_width)
+        if event == "-HEIGHT-":
+            stream_height = int(values["-HEIGHT-"])
+            cap.set(cv2.CAP_PROP_FRAME_HEIGHT, stream_height)
+
         frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         rect_x = int(left * frame_width)
@@ -367,7 +407,10 @@ def video_capture():
         if event == "-CAPTURE-":
             print("Capturing image...")
             captured_image = capture_frame(frame, rect)
-            captured_imgbytes = cv2.imencode(".png", captured_image)[1].tobytes()
+            captured_image_resized = resize_image(captured_image, diff_scale_factor)
+            captured_imgbytes = cv2.imencode(".png", captured_image_resized)[
+                1
+            ].tobytes()
             window["-CAPTURED-"].update(data=captured_imgbytes)
             print("Image Captured!")
 
