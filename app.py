@@ -249,6 +249,10 @@ def video_capture():
                             ],
                         ),
                     ],
+                ]
+            ),
+            sg.Column(
+                [
                     [
                         sg.Frame(
                             "Actions",
@@ -286,10 +290,6 @@ def video_capture():
                             ],
                         ),
                     ],
-                ]
-            ),
-            sg.Column(
-                [
                     [sg.Image(filename="", key="-IMAGE-")],
                     [sg.Text("Live Frame")],
                 ]
