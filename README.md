@@ -1,11 +1,26 @@
-User usage flow will be:
-1. Open the program, and it can set the video capture size and which capture stream, and also able to select the draw factor that will plot on the screen.
-2. Once configure, user will be able to press "Operate" to start the video capturing and drawing.
-3. Then user able to press a button "Save Sample" to screenshot down the image from the stream and save in the folder and update the image galery list for user to see.
-4. User then can from the image gallery list to select which picture as the base for the comparison, once confirm press "Set to Compare"
-5. If compare and get similar, will call to a function event_similar()
-6. if it is not similar, will call to a function event_not_similar()
-7. function event_similar() will print out the message
-8. function event_not_similar() will print out the message
+# SSIM Compare App
 
-Apply design architecture to make the program robust to swap the image comparison function in future
+## Usage
+
+Run the app with `python3 app.py`
+
+This app is used to compare two images using the SSIM algorithm. 
+
+![](./assets/app01.png)
+
+Image of App Usage
+
+![](./assets/app02.png)
+
+Image of App start running
+
+## Important Information
+
+If you change the stream dimensions or the rectangle size, you must capture a new reference image. Failing to do so will result in the stream comparison failing. This is because the reference image must match the current stream dimensions and rectangle size for accurate comparison.
+
+To capture a new reference image:
+1. Adjust the stream dimensions or rectangle size as needed.
+2. Click the "Capture Reference" button to capture a new reference image.
+3. Proceed with the comparison as usual.
+
+Remember to always capture a new reference image after making any changes to the stream or rectangle size.
