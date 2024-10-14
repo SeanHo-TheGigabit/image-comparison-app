@@ -96,7 +96,9 @@ def video_capture():
         captured_image = cv2.imread("captured_image.png")
         print("Captured image loaded successfully.")
     else:
+        captured_image = cv2.imread("sample/sample_capture.png")
         print("No captured image found or file is empty.")
+        print("Loaded sample image for comparison.")
 
     layout = [
         [

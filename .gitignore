@@ -165,3 +165,4 @@ config.json
 *.png
 *.zip
 !assets/*
+!sample/*
