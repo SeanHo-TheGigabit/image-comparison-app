@@ -1,4 +1,4 @@
-# SSIM Compare App
+# Image Compare App
 
 ## Usage
 
